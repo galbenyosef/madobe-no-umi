@@ -4,6 +4,8 @@
 
 GPT-image-2.5 で生成した一枚の画像（`source/coast.webp`）をベースに、アニメ背景画ふうに描き直し、奥行きのある層に分けて、窓辺の部屋ごと Three.js で組み立てています。
 
+**▶ ブラウザで開く: https://tanuu5.github.io/madobe-no-umi/**
+
 ![朝・昼・夕・夜](docs/times.jpg)
 
 - 元画像: GPT-image-2.5 で生成（`source/coast.webp`）
@@ -38,7 +40,7 @@ ES モジュールと画像を読み込むので、ファイルを直接開く�
 python3 -m http.server 8000
 ```
 
-ブラウザで `http://localhost:8000` を開きます。GitHub Pages などの静的ホスティングにそのまま置いても動きます。Three.js は jsDelivr の CDN から読み込みます（ビルド不要）。
+ブラウザで `http://localhost:8000` を開きます。GitHub Pages などの静的ホスティングにそのまま置いても動きます（このリポジトリも GitHub Pages で公開しています）。Three.js は jsDelivr の CDN から読み込みます（ビルド不要）。
 
 WebGL2 が使えるブラウザが必要です。画面の描画負荷に合わせて解像度を自動で調整します。
 
@@ -111,3 +113,7 @@ docs/                 README 用の画像
 
 - [three.js](https://threejs.org/)（MIT License）
 - フォント: [Zen Old Mincho](https://fonts.google.com/specimen/Zen+Old+Mincho)、[Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic)、[Bodoni Moda](https://fonts.google.com/specimen/Bodoni+Moda)（いずれも SIL Open Font License、Google Fonts から読み込み）
+
+## ライセンス
+
+[MIT License](LICENSE)
