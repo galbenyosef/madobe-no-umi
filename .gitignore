@@ -1,0 +1,22 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# local tooling (machine-specific paths live here)
+.claude/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node (not needed to run, but just in case)
+node_modules/
+
+# secrets
+.env
+.env.*

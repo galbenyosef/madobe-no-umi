@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>窓辺の海</title>
+<meta name="description" content="地中海の海辺の町を窓から眺める、ゆっくり動く3Dの風景。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@1,6..96,400&family=Zen+Maru+Gothic:wght@400;500&family=Zen+Old+Mincho:wght@500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --notte: #0f1b27;          /* night sea: page ground and loading veil */
+    --calce: #f3eee4;          /* lime-plaster white: text */
+    --nebbia: #b9c5ca;         /* sea mist: secondary text */
+    --persiana: #7dbb9a;       /* shutter green: active state */
+    --persiana-ink: #0f2a1f;
+    --glass: rgba(14, 25, 36, 0.46);
+    --glass-strong: rgba(14, 25, 36, 0.66);
+    --hairline: rgba(243, 238, 228, 0.16);
+    --focus: #f6d38a;
+    --font-ui: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    --font-title: "Zen Old Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    --font-it: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--notte);
+    color: var(--calce);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    touch-action: none;
+  }
+  #scene {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    outline: none;
+  }
+
+  /* ---- title card ---------------------------------------------------- */
+  .card {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 22px);
+    left: calc(env(safe-area-inset-left, 0px) + 24px);
+    display: grid;
+    gap: 6px;
+    max-width: min(22rem, calc(100vw - 48px));
+    pointer-events: none;
+    text-shadow: 0 1px 12px rgba(10, 20, 30, 0.45);
+    transition: opacity 1.6s ease;
+  }
+  .card h1 {
+    margin: 0;
+    font-family: var(--font-title);
+    font-weight: 500;
+    font-size: clamp(1.6rem, 3.2vw, 2.3rem);
+    letter-spacing: 0.14em;
+    line-height: 1.2;
+  }
+  .card .it {
+    font-family: var(--font-it);
+    font-style: italic;
+    font-size: 1.02rem;
+    letter-spacing: 0.02em;
+    color: var(--nebbia);
+  }
+  .card p {
+    margin: 6px 0 0;
+    font-size: 0.86rem;
+    line-height: 1.7;
+    color: var(--nebbia);
+    text-wrap: pretty;
+  }
+  .card .credit {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--nebbia);
+    opacity: 0.85;
+  }
+
+  /* ---- dock ---------------------------------------------------------- */
+  .dock {
+    position: fixed;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+    transform: translateX(-50%);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
+    background: var(--glass);
+    border: 1px solid var(--hairline);
+    border-radius: 18px;
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  .times {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 13px;
+    background: rgba(243, 238, 228, 0.07);
+  }
+  .times button, .tog {
+    appearance: none;
+    border: 0;
+    margin: 0;
+    font: inherit;
+    color: var(--calce);
+    background: transparent;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background 0.35s ease, color 0.35s ease;
+  }
+  .times button {
+    min-width: 2.6rem;
+    padding: 7px 10px 6px;
+    font-family: var(--font-title);
+    font-size: 1.02rem;
+    letter-spacing: 0.08em;
+  }
+  .times button[aria-pressed="true"] {
+    background: var(--persiana);
+    color: var(--persiana-ink);
+  }
+  .times button:hover:not([aria-pressed="true"]),
+  .tog:hover { background: rgba(243, 238, 228, 0.1); }
+  .tog {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px 8px 10px;
+    font-size: 0.86rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .tog svg { width: 18px; height: 18px; flex: none; }
+  .tog[aria-pressed="true"] { color: var(--persiana); }
+  .sep { width: 1px; align-self: stretch; margin: 6px 0; background: var(--hairline); }
+  button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .hint {
+    position: fixed;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    color: var(--nebbia);
+    text-align: center;
+    text-shadow: 0 1px 10px rgba(10, 20, 30, 0.6);
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+  }
+
+  /* idle: controls step aside, the view stays */
+  body.idle .dock { opacity: 0; transform: translate(-50%, 12px); pointer-events: none; }
+  body.idle .hint, body.idle .card.faded { opacity: 0; }
+  body.idle { cursor: none; }
+  .card.faded { opacity: 0; }
+
+  /* ---- loading veil -------------------------------------------------- */
+  .veil {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 14px;
+    background: var(--notte);
+    transition: opacity 1.8s ease;
+    z-index: 5;
+  }
+  .veil .mark {
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    letter-spacing: 0.3em;
+    padding-left: 0.3em;
+  }
+  .veil .bar {
+    width: 9rem;
+    height: 1px;
+    background: var(--hairline);
+    overflow: hidden;
+  }
+  .veil .bar i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--calce);
+    transition: width 0.4s ease;
+  }
+  .veil .msg { font-size: 0.8rem; color: var(--nebbia); letter-spacing: 0.06em; max-width: 26rem; text-align: center; line-height: 1.7; padding-inline: 16px; }
+  .veil.done { opacity: 0; pointer-events: none; }
+
+  @media (max-width: 560px) {
+    .card { left: 16px; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+    .card p { display: none; }
+    .times button { min-width: 2.3rem; padding-inline: 8px; }
+    .tog .lbl { display: none; }
+    .tog { padding: 8px; }
+    .hint { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dock, .card, .hint, .veil { transition: none; }
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="scene" tabindex="0" aria-label="窓から見える海辺の町の風景"></canvas>
+
+<header class="card" id="card">
+  <h1>窓辺の海</h1>
+  <span class="it">finestra sul mare</span>
+  <p>マウスを動かすと、窓辺で少し身をずらせます。ホイールで窓に寄ったり、椅子にもたれたり。</p>
+  <small class="credit">元画像 GPT-image-2.5 ／ 作成 Claude Opus 5.5（MAX）</small>
+</header>
+
+<div class="hint" id="hint">1〜4 で時間帯を切り替え、H で操作パネルを隠せます</div>
+
+<nav class="dock" id="dock" aria-label="風景の操作">
+  <div class="times" role="group" aria-label="時間帯">
+    <button type="button" id="t-morning" data-time="0" aria-pressed="false">朝</button>
+    <button type="button" id="t-day" data-time="1" aria-pressed="true">昼</button>
+    <button type="button" id="t-evening" data-time="2" aria-pressed="false">夕</button>
+    <button type="button" id="t-night" data-time="3" aria-pressed="false">夜</button>
+  </div>
+  <button type="button" class="tog" id="tog-cycle" aria-pressed="false" aria-label="移ろう（時間をゆっくり進める）" title="朝から夜へ、ゆっくり時間を進めます">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4h-4"/></svg>
+    <span class="lbl">移ろう</span>
+  </button>
+  <span class="sep" aria-hidden="true"></span>
+  <button type="button" class="tog" id="tog-sound" aria-pressed="false" aria-label="波の音" title="波と風の音">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 14c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2 1.6 3 2.4"/><path d="M3 19c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2 1.6 3 2.4" opacity=".55"/></svg>
+    <span class="lbl">波の音</span>
+  </button>
+  <button type="button" class="tog" id="tog-full" aria-pressed="false" aria-label="全画面" title="全画面">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    <span class="lbl">全画面</span>
+  </button>
+</nav>
+
+<div class="veil" id="veil" role="status">
+  <div class="mark">窓辺の海</div>
+  <div class="bar"><i id="veil-bar"></i></div>
+  <div class="msg" id="veil-msg">窓を開けています…</div>
+</div>
+
+<script>
+  // if the scene has not started after a while (blocked CDN, offline), say so instead of spinning
+  setTimeout(function () {
+    if (!window.__finestraStarted) {
+      document.getElementById('veil-msg').textContent = '読み込みに時間がかかっています。ネットワークを確認して、ページを再読み込みしてください。';
+    }
+  }, 20000);
+</script>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
